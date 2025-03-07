@@ -198,6 +198,7 @@ public class BattleShip {
         for (int i =0 ; i < GRID_SIZE ; ++i ){
             for (int j =0 ; j < GRID_SIZE ; ++j ){
                 if (grid[i][j]==SHIP)
+
                     return false;
             }
 
