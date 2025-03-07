@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -5,6 +6,10 @@ import java.util.Scanner;
   It includes methods to manage grids, turns, and check the game status.
  */
 public class BattleShip {
+    static char EMPTY = '~';
+    static char SHIP = 'S';
+    static char HIT = 'X';
+    static char MISS = 'O';
 
     // Grid size for the game
     static final int GRID_SIZE = 10;
@@ -36,9 +41,12 @@ public class BattleShip {
         initializeGrid(player1TrackingGrid);
         initializeGrid(player2TrackingGrid);
 
+
         // Place ships randomly on each player's grid
         placeShips(player1Grid);
         placeShips(player2Grid);
+       //printGrid(player1Grid);
+        //printGrid(player2Grid);
 
         // Variable to track whose turn it is
         boolean player1Turn = true;
@@ -66,7 +74,11 @@ public class BattleShip {
       @param grid The grid to initialize.
      */
     static void initializeGrid(char[][] grid) {
-        //todo
+        for (int i =0 ; i < GRID_SIZE ; ++i ){
+            for (int j =0 ; j < GRID_SIZE ; ++j ){
+                grid[i][j] = EMPTY;
+            }
+        }
     }
 
     /**
@@ -76,7 +88,27 @@ public class BattleShip {
       @param grid The grid where ships need to be placed.
      */
     static void placeShips(char[][] grid) {
-        //todo
+        int [] sizeShips = {5,4,3,2};
+        Random random = new Random();
+        for (int size : sizeShips) {
+            boolean placed = false;
+            while (!placed){
+                boolean horizontal = random.nextBoolean();
+                int x = random.nextInt(GRID_SIZE);
+                int y = random.nextInt(GRID_SIZE);
+                if(canPlaceShip(grid , x ,y ,size,horizontal )){
+                    for (int i =0 ; i < size ; ++i ){
+                        if(horizontal){
+                            grid[x][y+i]=SHIP;
+                        }else {
+                            grid[x+i][y]=SHIP;
+                        }
+                    }
+                    placed = true;
+                }
+            }
+
+        }
     }
 
     /**
@@ -92,7 +124,22 @@ public class BattleShip {
       @return true if the ship can be placed at the specified location, false otherwise.
      */
     static boolean canPlaceShip(char[][] grid, int row, int col, int size, boolean horizontal) {
-        //todo
+
+        if (horizontal) {
+            if (col + size > GRID_SIZE)
+                return false;
+          for (int i = 0; i < size ; ++i ){
+              if (grid[row][col+i] != EMPTY)
+                  return false;
+          }
+        }else {
+            if (row + size > GRID_SIZE)
+                return false;
+            for (int i = 0; i < size ; ++i ){
+                if (grid[row+i][col] != EMPTY)
+                    return false;
+            }
+        }
         return true;
     }
 
@@ -104,7 +151,29 @@ public class BattleShip {
       @param trackingGrid The player's tracking grid to update.
      */
     static void playerTurn(char[][] opponentGrid, char[][] trackingGrid) {
-        //todo
+        System.out.println("Enter the target like ( B6 ) ! ");
+        String input = scanner.nextLine().toUpperCase();
+        if (!isValidInput(input)){
+            System.out.println("Invalid input!");
+            return;
+        }
+        int row = input.charAt(1) - '0';
+        int col = input.charAt(0)-  'A';
+
+        if(trackingGrid[row][col]==MISS || trackingGrid[row][col]==HIT){
+            System.out.println("Already attacked !");
+        }
+        if (opponentGrid[row][col] == SHIP){
+            System.out.println("Hit !");
+            opponentGrid[row][col] = HIT;
+            trackingGrid[row][col] = HIT;
+
+        }else if (opponentGrid[row][col] == EMPTY){
+            System.out.println("Miss !");
+            opponentGrid[row][col] = MISS;
+            trackingGrid[row][col] = MISS;
+        }
+
     }
 
     /**
@@ -113,8 +182,10 @@ public class BattleShip {
       @return true if the game is over (all ships are sunk), false otherwise.
      */
     static boolean isGameOver() {
-        //todo
-        return false;
+        boolean player1ships = allShipsSunk(player1Grid);
+        boolean player2ships = allShipsSunk(player2Grid);
+
+        return player1ships || player2ships;
     }
 
     /**
@@ -124,7 +195,13 @@ public class BattleShip {
       @return true if all ships are sunk, false otherwise.
      */
     static boolean allShipsSunk(char[][] grid) {
-        //todo
+        for (int i =0 ; i < GRID_SIZE ; ++i ){
+            for (int j =0 ; j < GRID_SIZE ; ++j ){
+                if (grid[i][j]==SHIP)
+                    return false;
+            }
+
+        }
         return true;
     }
 
@@ -132,10 +209,21 @@ public class BattleShip {
       Validates if the user input is in the correct format (e.g., A5).
 
       @param input The input string to validate.
-      @return true if the input is in the correct format, false otherwise.
+      @return true if the input is in the correct format, falsae otherwise.
      */
     static boolean isValidInput(String input) {
         //todo
+        if (input.length()>2){
+            return false;
+        }
+
+        if (input.charAt(0) < 'A' ||input.charAt(0) > 'J') {
+            return false;
+        }
+        int row = Integer.parseInt(input.substring(1));
+        if (row <0 || row > GRID_SIZE ) {
+            return false;
+        }
         return true;
     }
 
@@ -146,6 +234,22 @@ public class BattleShip {
       @param grid The tracking grid to print.
      */
     static void printGrid(char[][] grid) {
-        //todo
+        char [] alpahbet = {'A','B','C','D','E','F','G','H','I','J'};
+        System.out.print("  ");
+        for (int i =0 ; i < GRID_SIZE ; ++i ){
+            System.out.print( "  " + alpahbet[i] + "");
+
+
+            }
+        System.out.println();
+        for (int i =0 ; i < GRID_SIZE ; ++i ){
+            System.out.print(i + "  " );
+            for (int j =0 ; j < GRID_SIZE ; ++j ){
+                System.out.print( " " + grid[i][j] + " ");
+
+            }
+            System.out.println();
+        }
+        System.out.println("------------------------------------------------------------------------------------------------------");
     }
 }
